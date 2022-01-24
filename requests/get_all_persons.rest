@@ -1,1 +1,1 @@
-GET https://frozen-reef-08202.herokuapp.com/api/persons
+GET https://localhost:3001/api/persons
