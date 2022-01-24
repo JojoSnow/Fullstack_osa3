@@ -13,19 +13,6 @@ morgan.token('body', (req, res) => JSON.stringify(req.body));
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
-if (process.argv.length === 3) {
-    console.log(`phonebook:`) 
-    Person.find({}).then(result => {
-        result.forEach(p => {
-            console.log(p.name, p.number);
-        });
-    });
-} else if (process.argv.length > 3) {
-    person.save().then(result => {
-        console.log(`added ${result.name} number ${result.number} to phonebook`);
-    });
-}
-
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(ps => {
       response.json(ps)
@@ -47,9 +34,7 @@ app.get('/api/persons/:id', (request, response) => {
         } else {
             return response.json(p);
         }
-    });
-
-    
+    }); 
 })
 
 // app.delete('/api/persons/:id', (request, response) => {
@@ -61,29 +46,12 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
     const body = request.body;
+    console.log(body)
     
-    if (body.content === undefined) {
-        return response.status(400).json({ error: 'content missing'});
-    }
-
     const person = new Person({
         name: body.name,
         number: body.number
     })
-
-    if (!body.name) {
-        return response.status(400).json({
-            error: 'name missing'
-        });
-    } else if (!body.number) {
-        return response.status(400).json({
-            error: 'number missing'
-        });
-    } else if (body.name) {
-        return response.status(400).json({
-            error: 'name must be unique'
-        });
-    }
 
     person.save().then(savedPerson => {
         response.json(savedPerson);
