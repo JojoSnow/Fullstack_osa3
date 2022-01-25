@@ -31,10 +31,14 @@ app.get('/api/persons', (request, response) => {
 });
 
 app.get('/info', (request, response) => {
-    const peopleAmount = persons.length;
     const reqTime = new Date();
+    const counting = Person.count({});
+    
+    counting.then(count => {
+        response.send(`<p>Phonebook has info for ${count} people</p> <p>${reqTime}</p>`);
+    })
 
-    response.send(`<p>Phonebook has info for ${peopleAmount} people</p> <p>${reqTime}</p>`);
+    
 });
 
 app.get('/api/persons/:id', (request, response) => {
