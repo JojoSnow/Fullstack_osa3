@@ -14,6 +14,16 @@ morgan.token('body', (req, res) => JSON.stringify(req.body));
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
+const requestLogger = (request, response, next) => {
+    console.log('Method:', request.method);
+    console.log('Path:  ', request.path);
+    console.log('Body:  ', request.body);
+    console.log('---');
+    next();
+};
+  
+  app.use(requestLogger);
+
 app.get('/api/persons', (request, response) => {
     Person.find({}).then(ps => {
         response.json(ps)
@@ -39,14 +49,6 @@ app.get('/api/persons/:id', (request, response) => {
     }); 
 });
 
-app.delete('/api/persons/:id', (request, response) => {
-    Person.findByIdAndRemove(request.params.id)
-        .then(result => {
-            response.status(204).end();
-        })
-        .catch(error => next(error));
-});
-
 app.post('/api/persons', (request, response) => {
     const body = request.body;
     
@@ -58,6 +60,29 @@ app.post('/api/persons', (request, response) => {
     person.save().then(savedPerson => {
         response.json(savedPerson);
     });
+});
+
+app.delete('/api/persons/:id', (request, response) => {
+    Person.findByIdAndRemove(request.params.id)
+        .then(result => {
+            response.status(204).end();
+        })
+        .catch(error => next(error))
+});
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body;
+
+    const person = {
+        name: body.name,
+        number: body.number
+    };
+
+    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+        .then(updatedPerson => {
+            response.json(updatedPerson)
+        })
+        .catch(error => next(error))
 });
 
 const unknownEndpoint = (request, response) => {
@@ -73,7 +98,7 @@ const errorHandler = (error, request, response, next) => {
         return response.status(400).send({ error: 'malformatted id' })
     }
 
-    next(error);
+    next(error)
 };
 
 app.use(errorHandler);
